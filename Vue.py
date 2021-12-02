@@ -142,6 +142,16 @@ class VueCourbes(object):
                 self.triangleColor[c] = round(self.triangleColor[c])
             self.triangleColor = tuple(self.triangleColor)
 
+    def callbackNouvellesceneFilsdefer(self):
+        """Supprime toutes les courbes."""
+        self.controleur = Controleur.ControleurCourbes()
+        self.majAffichage()
+        self.drawControles.set(0)
+        self.controleur.nouvelleSceneFildefer(self.largeur, self.hauteur)
+        self.majAffichage()
+        self.outilsCourant = []
+        self.outilsSauvergarde = []
+
     def majAffichage(self):
         """ Met a jour l'affichage.. """
         # efface la zone de dession
@@ -173,6 +183,9 @@ class VueCourbes(object):
         menu.add_cascade(label="Fichier", menu=filemenu)
         filemenu.add_command(label="Nouveau", command=self.callbackNouveau)
         filemenu.add_separator()
+        filemenu.add_command(label="Import scene fils de fer",
+                             command=self.callbackNouvellesceneFilsdefer)
+        filemenu.add_separator()
         filemenu.add_command(label="Quitter", command=fenetre.destroy)
         toolsmenu = tkinter.Menu(menu)
         menu.add_cascade(label="Outils", menu=toolsmenu)
@@ -186,7 +199,7 @@ class VueCourbes(object):
                               command=self.callbackDroite)
         toolsmenu.add_command(label="Ajouter un segment",
                               command=self.callbackSegment)
-        toolsmenu.add_command(label="Ajouter un segment",
+        toolsmenu.add_command(label="Ajouter un segment Point Milieu",
                               command=self.callbackSegmentPointMilieu)
         toolsmenu.add_command(label="Ajouter un triangle Rempli",
                               command=self.callbackTriangleRempli)
