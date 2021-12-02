@@ -81,3 +81,8 @@ class ControleurCourbes(object):
         segmentPointMilieu = Modele.SegmentPointMilieu(couleur)
         self.ajouterCourbe(segmentPointMilieu)
         return segmentPointMilieu.ajouterControle
+
+    def nouveauTriangleRempli(self, couleur):
+        triangleRempli = Modele.TriangleRempli(couleur)
+        self.ajouterCourbe(triangleRempli)
+        return triangleRempli.ajouterControle

@@ -30,6 +30,7 @@ class VueCourbes(object):
         self.outilsSauvergarde = []
         # Color Pickers
         self.segmentColor = (128, 128, 128)
+        self.triangleColor = (128, 128, 128)
 
     def callbackButton1(self, event):
         """ Bouton gauche : utilise l'outils courant. """
@@ -125,6 +126,22 @@ class VueCourbes(object):
         self.outilsSauvergarde = lambda: self.callbackSegmentPointMilieu()
         self.requieredAddedControles = 2
 
+    def callbackTriangleRempli(self):
+        self.outilsCourant = self.controleur.nouveauTriangleRempli(
+            self.triangleColor
+        )
+        self.outilsSauvergarde = lambda: self.callbackTriangleRempli()
+        self.requieredAddedControles = 3
+
+    def callbackTriangleColorPick(self):
+        """ Choisi la couleur des Triangle. """
+        color = tkinter.colorchooser.askcolor()
+        if color[0]:
+            self.triangleColor = list(color[0])
+            for c in range(3):
+                self.triangleColor[c] = round(self.triangleColor[c])
+            self.triangleColor = tuple(self.triangleColor)
+
     def majAffichage(self):
         """ Met a jour l'affichage.. """
         # efface la zone de dession
@@ -171,6 +188,8 @@ class VueCourbes(object):
                               command=self.callbackSegment)
         toolsmenu.add_command(label="Ajouter un segment",
                               command=self.callbackSegmentPointMilieu)
+        toolsmenu.add_command(label="Ajouter un triangle Rempli",
+                              command=self.callbackTriangleRempli)
         ### Ajouts TPs ###
         ## Boutons ##
         togglemenu = tkinter.Menu(menu)
@@ -187,6 +206,8 @@ class VueCourbes(object):
         editormenu = tkinter.Menu(menu)
         editormenu.add_command(label="Couleur des Segment",
                                command=self.callbackSegmentColorPick)
+        editormenu.add_command(label="Couleur des Triangles",
+                               command=self.callbackTriangleColorPick)
         menu.add_cascade(label="Editeur", menu=editormenu)
 
         # Canvas : widget pour le dessin dans la fenetre principale

@@ -1,3 +1,8 @@
+from tkinter.constants import ACTIVE
+
+from PIL.Image import new
+
+
 class Courbe(object):
     """ Classe generique definissant une courbe. """
 
@@ -267,3 +272,156 @@ class SegmentPointMilieu(Courbe):
                             x -= 1
                             y += 1
                         dessinerPoint((x, y), self.couleur)
+
+
+class Arrete():
+
+    def __init__(self, yhaut1=0, x1=0, num1=0, den1=0, inc1=0):
+        self.yhaut = yhaut1
+        self.x = x1
+        self.num = num1
+        self.den = den1
+        self.inc = inc1
+
+    def mise_a_jour(self):
+        self.inc += self.num
+        Q = self.inc/self.den
+        self.x += Q
+        self.inc -= Q*self.den
+
+
+class TriangleRempli(Courbe):
+    """remplir le triangle de la couleur passee au constructeur"""
+
+    def __init__(self, couleur):
+        Courbe.__init__(self, (0, 0, 0), couleur)
+
+    def ajouterControle(self, point):
+        """ Ajoute un point de controle.Ne fait rien si les 3 points existent deja."""
+        if len(self.controles) < 3:
+            Courbe.ajouterControle(self, point)
+
+    def remplir(self, dessinerPoint):
+        if len(self.controles) == 3:
+            Pmax = [0, 1]
+            Pmoy = [0, 1]
+            Pmin = [0, 1]
+            if (self.controles[0][1] >= self.controles[1][1]) and (self.controles[0][1] >= self.controles[2][1]):
+                Pmax = self.controles[0]
+                if self.controles[1][1] >= self.controles[2][1]:
+                    Pmoy = self.controles[1]
+                    Pmin = self.controles[2]
+                else:
+                    Pmoy = self.controles[2]
+                    Pmin = self.controles[1]
+            elif (self.controles[1][1] >= self.controles[0][1]) and (self.controles[1][1] >= self.controles[2][1]):
+                Pmax = self.controles[1]
+                if self.controles[0][1] >= self.controles[2][1]:
+                    Pmoy = self.controles[0]
+                    Pmin = self.controles[2]
+                else:
+                    Pmoy = self.controles[2]
+                    Pmin = self.controles[0]
+            else:
+                Pmax = self.controles[2]
+                if self.controles[0][1] >= self.controles[1][1]:
+                    Pmoy = self.controles[0]
+                    Pmin = self.controles[1]
+                else:
+                    Pmoy = self.controles[1]
+                    Pmin = self.controles[0]
+
+            y = Pmin[1]
+
+            dxMinMax = Pmax[0] - Pmin[0]
+            dyMinMax = Pmax[1] - Pmin[1]
+
+            # Pmoy est a gauche
+            if (dyMinMax * (Pmoy[0] - Pmin[0]) - dxMinMax * (Pmoy[1] - Pmin[1])) < 0:
+                print("Pmoy est a gauche")
+                # [yhaut, x, num, den, inc]
+                # [Pmin,Pmoy] arête gauche  et [Pmin,Pmax] arête droite
+                num = Pmoy[0] - Pmin[0]
+                den = Pmoy[1] - Pmin[1]
+                if num > 0:
+                    increment = den - 1
+                else:
+                    increment = 0
+                AActiveGauche = Arrete(Pmoy[1], Pmin[0], num, den, increment)
+
+                num = Pmax[0] - Pmin[0]
+                den = Pmax[1] - Pmin[1]
+                if num > 0:
+                    increment = -1
+                else:
+                    increment = -den
+                AActiveDroite = Arrete(Pmax[1], Pmin[0], num, den, increment)
+
+                while y < Pmoy[1]:
+                    for i in range(int(AActiveGauche.x), int(AActiveDroite.x)):
+                        dessinerPoint((i, y), self.brush)
+                    AActiveDroite.mise_a_jour()
+                    AActiveGauche.mise_a_jour()
+                    y += 1
+
+                # Redefinition AActiveGauche
+
+                num = Pmax[0] - Pmoy[0]
+                den = Pmax[1] - Pmoy[1]
+                if num > 0:
+                    increment = den - 1
+                else:
+                    increment = 0
+                AActiveGauche = Arrete(Pmax[1], Pmoy[0], num, den, increment)
+
+                while y < Pmax[1]:
+                    for i in range(int(AActiveGauche.x), int(AActiveDroite.x)):
+                        dessinerPoint((i, y), self.brush)
+                    AActiveDroite.mise_a_jour()
+                    AActiveGauche.mise_a_jour()
+                    y += 1
+
+            elif (dyMinMax * (Pmoy[0] - Pmin[0]) - dxMinMax * (Pmoy[1] - Pmin[1])) > 0:
+                print("Pmoy est a droite")
+                # [yhaut, x, num, den, inc]
+                # [Pmin,Pmax] arête gauche  et [Pmin,Pmoy] arête droite
+                num = Pmax[0] - Pmin[0]
+                den = Pmax[1] - Pmin[1]
+                if num > 0:
+                    increment = den - 1
+                else:
+                    increment = 0
+                AActiveGauche = Arrete(Pmax[1], Pmin[0], num, den, increment)
+
+                num = Pmoy[0] - Pmin[0]
+                den = Pmoy[1] - Pmin[1]
+                if num > 0:
+                    increment = -1
+                else:
+                    increment = -den
+                AActiveDroite = Arrete(Pmoy[1], Pmin[0], num, den, increment)
+
+                while y < Pmoy[1]:
+                    print("premiere")
+                    for i in range(int(AActiveGauche.x), int(AActiveDroite.x)):
+                        dessinerPoint((i, y), self.brush)
+                    AActiveDroite.mise_a_jour()
+                    AActiveGauche.mise_a_jour()
+                    y += 1
+
+                # Redefinition AActiveDroite
+
+                num = Pmax[0] - Pmoy[0]
+                den = Pmax[1] - Pmoy[1]
+                if num > 0:
+                    increment = -1
+                else:
+                    increment = -den
+                AActiveDroite = Arrete(Pmax[1], Pmoy[0], num, den, increment)
+
+                while y < Pmax[1]:
+                    for i in range(int(AActiveGauche.x), int(AActiveDroite.x)):
+                        dessinerPoint((i, y), self.brush)
+                    AActiveDroite.mise_a_jour()
+                    AActiveGauche.mise_a_jour()
+                    y += 1
